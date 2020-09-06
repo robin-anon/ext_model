@@ -36,9 +36,11 @@ def calc_util(ent_array):
 
 def rat_sim(ent_array):
 	util = calc_util(ent_array)
+	prev_util = util
 	bin_vector = ent_array[2]
 	while True:
 		prev_bin_vector = bin_vector
+		prev_prev_util = prev_util
 		prev_util = util
 		n_ent = sum(bin_vector)
 		for i, x in enumerate(bin_vector):
@@ -51,15 +53,17 @@ def rat_sim(ent_array):
 		util = calc_util(temp_array)
 		if util == prev_util:
 			return bin_vector
-		if util < prev_util:
+		if util == prev_prev_util:
 			return prev_bin_vector
 
 
 def alt_sim(ent_array):
 	util = calc_util(ent_array)
+	prev_util = util
 	bin_vector = ent_array[2]
 	while True:
 		prev_bin_vector = bin_vector
+		prev_prev_util = prev_util
 		prev_util = util
 		n_ent = sum(bin_vector)
 		for i, x in enumerate(bin_vector):
@@ -80,7 +84,7 @@ def alt_sim(ent_array):
 		util = calc_util(temp_array)
 		if util == prev_util:
 			return bin_vector
-		if util < prev_util:
+		if util == prev_prev_util:
 			return prev_bin_vector
 
 
