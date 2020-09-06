@@ -1,7 +1,27 @@
+import random
 import numpy as np
 import pandas as pd
 import scipy.stats
 import scipy.optimize
+from simanneal import Annealer
+
+
+class OptSim(Annealer):
+
+	def __init__(self, ent_array):
+		self.ent_array = ent_array
+		state = np.zeros(len(ent_array[2]))
+		super(OptSim, self).__init__(state)
+
+	def move(self):
+		i = random.randint(0, len(self.state) - 1)
+		if self.state[i] == 0:
+			self.state[i] = 1
+		else:
+			self.state[i] = 0
+
+	def energy(self):
+		return 0 - calc_util(np.vstack((self.ent_array[0:2], self.state)))
 
 
 def calc_util(ent_array):
@@ -64,10 +84,47 @@ def alt_sim(ent_array):
 			return prev_bin_vector
 
 
+
 def opt_sim(ent_array):
+	os = OptSim(ent_array)
+	os.set_schedule(os.auto(minutes=3))
+	state, e = os.anneal()
+	return state
+
+
+'''
+ def opt_sim(ent_array):
 	init = ent_array[2]
-	func_1 = lambda x: len([y for y in x if y != 0 and y != 1])
-	con_1 = scipy.optimize.NonlinearConstraint(func_1, 0, 0)
-	func_2 = lambda x: np.vstack(ent_array[0:2], x)
-	result = scipy.optimize.minimize(func_2, init, constraints=con_1)
-	return result["x"]
+	# func_1 = lambda x: len([y for y in x if y != 0 and y != 1])
+	# con_1 = scipy.optimize.NonlinearConstraint(func_1, 0, 0)
+	bound = scipy.optimize.Bounds(0, 1)
+	func_2 = lambda x: 1 - calc_util(np.vstack((ent_array[0:2], x)))
+	# result = scipy.optimize.minimize(func_2, init, constraints=con_1)
+	result = scipy.optimize.minimize(func_2, init, bounds=bound)
+	return np.array([round(x) for x in result["x"]])
+
+
+class Step(object):
+
+	def __init__(self):
+		return
+
+	def __call__(self, x):
+		while True:
+			index = random.randint(0, len(x) - 1)
+			if x[index] == 0:
+				x[index] = 1
+			else:
+				x[index] = 0
+			if all([y == 0 or y == 1 for y in x]):
+				break
+		return x
+
+
+def opt_sim(ent_array):
+	init = np.zeros(len(ent_array[2]))
+	func = lambda x: -calc_util(np.vstack((ent_array[0:2], x)))
+	step=Step()
+	result = scipy.optimize.basinhopping(func, init, take_step=step)
+	return result
+'''
